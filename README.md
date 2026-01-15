@@ -107,13 +107,13 @@ Agent instructions are iteratively refined through an evaluation loop to improve
 
 1. **Clone the repo**
    ```bash
-   git clone https://github.com/your-username/nvAgent.git
+   git clone https://github.com/your-username/VIZAGENT.git
    cd VIZAGENT
    ```
 
 2. **Install dependencies**
    ```bash
-   pip install -r requirements_plotly_agent.txt
+   pip install -r requirements.txt
    ```
 
 3. **Set your OpenAI API key**
