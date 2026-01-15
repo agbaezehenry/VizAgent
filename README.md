@@ -106,20 +106,36 @@ Agent instructions are iteratively refined through an evaluation loop to improve
 
 ## Quick Start
 
-```bash
-pip install -r requirements_plotly_agent.txt
-export OPENAI_API_KEY='your-api-key'
-```
+1. **Clone the repo**
+   ```bash
+   git clone https://github.com/your-username/nvAgent.git
+   cd VIZAGENT
+   ```
 
-```python
-from plotly_agent.workflow_orchestrator import WorkflowOrchestrator
+2. **Install dependencies**
+   ```bash
+   pip install -r requirements_plotly_agent.txt
+   ```
 
-orch = WorkflowOrchestrator()
-orch.load_data("data.csv")
+3. **Set your OpenAI API key**
+   ```bash
+   export OPENAI_API_KEY='your-api-key'
+   ```
 
-response = orch.chat("Show revenue trends, highlighting Cloud Service")
-print(response["code"])
-```
+4. **Run the web app**
+   ```bash
+   python web_app_workflow.py
+   ```
+
+5. **Open in browser**
+   ```
+   http://localhost:5000
+   ```
+
+6. **Upload a CSV and start chatting**
+   - Upload your data file
+   - Ask: "Show revenue trends, highlighting Cloud Service"
+   - The agent generates story-driven Plotly code
 
 ---
 
