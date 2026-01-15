@@ -4,8 +4,6 @@ An AI agent that turns raw charts into story-driven visualizations.
 
 Instead of just generating Plotly code, the agent understands what you're trying to say with your data and reshapes the chart to make that message clear—following principles from:
 - [Storytelling with Data](https://www.storytellingwithdata.com/chart-guide)
-- Financial/business visualization best practices
-- Editorial chart design from journalism and analytics
 
 **The goal:** Not "draw a chart," but "tell a story with data."
 
@@ -16,10 +14,11 @@ Instead of just generating Plotly code, the agent understands what you're trying
 You give the agent:
 - A dataset
 - A natural-language request (e.g., "Show revenue trends and highlight Cloud services")
+- Multi-turn conversation between the user and the agent to improve the plot
 
 The agent:
 - Interprets the intent
-- Chooses an appropriate chart type
+- Chooses an appropriate chart type or elicits for clarity from the user
 - Applies storytelling rules (focus, contrast, ordering, labeling, color)
 - Generates clean Plotly code
 
