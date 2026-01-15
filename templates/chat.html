@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plotly Agent - Chat Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .upload-section {
+            padding: 20px 30px;
+            background: #f7fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .upload-area {
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #edf2f7;
+        }
+
+        .upload-area.active {
+            border-color: #667eea;
+            background: #e6fffa;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            background: #f7fafc;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: #667eea;
+        }
+
+        .message.assistant .message-avatar {
+            background: #48bb78;
+        }
+
+        .message-content {
+            max-width: 70%;
+            background: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .message.user .message-content {
+            background: #667eea;
+            color: white;
+        }
+
+        .message-text {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-top: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .metadata {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #718096;
+        }
+
+        .metadata-item {
+            background: #edf2f7;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+
+        .suggestions {
+            margin-top: 12px;
+            padding: 12px;
+            background: #fef5e7;
+            border-left: 3px solid #f39c12;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .suggestions-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #e67e22;
+        }
+
+        .input-container {
+            padding: 20px 30px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
+        #messageInput:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-send {
+            padding: 14px 32px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-send:hover:not(:disabled) {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-send:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        .status {
+            padding: 12px 20px;
+            background: #e6fffa;
+            border-left: 4px solid #38b2ac;
+            margin: 20px 30px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 20px;
+            text-align: center;
+            color: #718096;
+        }
+
+        .typing-indicator.show {
+            display: block;
+        }
+
+        .typing-dots span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #cbd5e0;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Plotly Agent - Chat Interface</h1>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="resetSession()">Reset</button>
+                <input type="file" id="fileInput" accept=".csv" style="display: none;" onchange="handleFileSelect(event)">
+                <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                    Upload CSV
+                </button>
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <p>📊 Click to upload a CSV file or drag and drop</p>
+                <p style="font-size: 12px; color: #718096; margin-top: 8px;">
+                    Upload your data to start generating visualizations
+                </p>
+            </div>
+        </div>
+
+        <div class="status" id="status"></div>
+
+        <div class="chat-container" id="chatContainer">
+            <div class="message assistant">
+                <div class="message-avatar">AI</div>
+                <div class="message-content">
+                    <div class="message-text">
+                        👋 Hello! I'm your Plotly code generation assistant. Upload a CSV file and tell me what visualization you'd like to create!
+                        <br><br>
+                        <strong>Examples:</strong>
+                        <ul style="margin-top: 8px; margin-left: 20px;">
+                            <li>"Create a scatter plot of x vs y"</li>
+                            <li>"Show sales trends over time"</li>
+                            <li>"Make a bar chart colored by region"</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <p style="margin-top: 8px;">Agent is thinking...</p>
+        </div>
+
+        <div class="input-container">
+            <div class="input-wrapper">
+                <input
+                    type="text"
+                    id="messageInput"
+                    placeholder="Type your message here..."
+                    onkeypress="handleKeyPress(event)"
+                >
+                <button class="btn-send" id="sendBtn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let dataLoaded = false;
+
+        async function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            showStatus('Uploading and processing file...', 'info');
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus(result.message, 'success');
+                    dataLoaded = true;
+                    addMessage('assistant', `✅ Data loaded successfully!\n\n${result.message}\n\nColumns: ${result.columns.join(', ')}`);
+                } else {
+                    showStatus('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showStatus('Error uploading file: ' + error.message, 'error');
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            // Add user message
+            addMessage('user', message);
+            input.value = '';
+
+            // Show typing indicator
+            document.getElementById('typingIndicator').classList.add('show');
+            document.getElementById('sendBtn').disabled = true;
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                const result = await response.json();
+
+                // Hide typing indicator
+                document.getElementById('typingIndicator').classList.remove('show');
+                document.getElementById('sendBtn').disabled = false;
+
+                if (result.success) {
+                    // Build message content
+                    let content = result.content;
+
+                    // Add code if present
+                    if (result.code) {
+                        content += '\n\n<strong>Generated Code:</strong>';
+                    }
+
+                    addMessage('assistant', content, result.code, result.metadata, result.suggestions);
+                } else {
+                    addMessage('assistant', '❌ Error: ' + result.error);
+                }
+            } catch (error) {
+                document.getElementById('typingIndicator').classList.remove('show');
+                document.getElementById('sendBtn').disabled = false;
+                addMessage('assistant', '❌ Error: ' + error.message);
+            }
+        }
+
+        function addMessage(role, text, code = null, metadata = null, suggestions = null) {
+            const container = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = role === 'user' ? 'U' : 'AI';
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+
+            const textDiv = document.createElement('div');
+            textDiv.className = 'message-text';
+            textDiv.innerHTML = text.replace(/\n/g, '<br>');
+            content.appendChild(textDiv);
+
+            // Add code block
+            if (code) {
+                const codeBlock = document.createElement('div');
+                codeBlock.className = 'code-block';
+                codeBlock.textContent = code;
+                content.appendChild(codeBlock);
+            }
+
+            // Add metadata
+            if (metadata) {
+                const metadataDiv = document.createElement('div');
+                metadataDiv.className = 'metadata';
+
+                if (metadata.chart_type) {
+                    const item = document.createElement('span');
+                    item.className = 'metadata-item';
+                    item.textContent = `📊 ${metadata.chart_type}`;
+                    metadataDiv.appendChild(item);
+                }
+
+                if (metadata.quality_score) {
+                    const item = document.createElement('span');
+                    item.className = 'metadata-item';
+                    item.textContent = `⭐ Quality: ${(metadata.quality_score * 100).toFixed(0)}%`;
+                    metadataDiv.appendChild(item);
+                }
+
+                if (metadata.confidence) {
+                    const item = document.createElement('span');
+                    item.className = 'metadata-item';
+                    item.textContent = `🎯 Confidence: ${(metadata.confidence * 100).toFixed(0)}%`;
+                    metadataDiv.appendChild(item);
+                }
+
+                content.appendChild(metadataDiv);
+            }
+
+            // Add suggestions
+            if (suggestions && suggestions.length > 0) {
+                const suggestionsDiv = document.createElement('div');
+                suggestionsDiv.className = 'suggestions';
+
+                const title = document.createElement('div');
+                title.className = 'suggestions-title';
+                title.textContent = '💡 Suggestions:';
+                suggestionsDiv.appendChild(title);
+
+                suggestions.forEach(s => {
+                    const item = document.createElement('div');
+                    item.textContent = '• ' + s;
+                    suggestionsDiv.appendChild(item);
+                });
+
+                content.appendChild(suggestionsDiv);
+            }
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            container.appendChild(messageDiv);
+
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.style.background = type === 'success' ? '#e6fffa' :
+                                     type === 'error' ? '#fff5f5' : '#e6fffa';
+            status.style.borderLeftColor = type === 'success' ? '#38b2ac' :
+                                           type === 'error' ? '#f56565' : '#38b2ac';
+            status.classList.add('show');
+
+            setTimeout(() => {
+                status.classList.remove('show');
+            }, 3000);
+        }
+
+        async function resetSession() {
+            if (!confirm('Reset conversation? This will clear all messages.')) return;
+
+            try {
+                await fetch('/api/reset', { method: 'POST' });
+                document.getElementById('chatContainer').innerHTML = '';
+                addMessage('assistant', '✅ Session reset. Ready for a new conversation!');
+                dataLoaded = false;
+            } catch (error) {
+                showStatus('Error resetting session', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

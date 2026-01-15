@@ -25,13 +25,16 @@ class BaseAgent:
         with open(prompt_path, 'r', encoding='utf-8') as f:
             return f.read()
 
-    def call_llm(self, messages: List[Dict[str, str]], temperature: float = 0.7) -> str:
+    def call_llm(self, messages: List[Dict[str, str]], temperature: Optional[float] = None) -> str:
         """Call OpenAI API"""
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            temperature=temperature
-        )
+        kwargs = {
+            "model": self.model,
+            "messages": messages,
+        }
+        # Only set temperature if explicitly provided (some models don't support it)
+        if temperature is not None:
+            kwargs["temperature"] = temperature
+        response = self.client.chat.completions.create(**kwargs)
         return response.choices[0].message.content
 
 
