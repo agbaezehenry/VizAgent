@@ -102,6 +102,25 @@ Agent instructions are iteratively refined through an evaluation loop to improve
 - A plotting wrapper
 - A static chart generator
 
+--- 
+
+## Quick Start
+
+```bash
+pip install -r requirements_plotly_agent.txt
+export OPENAI_API_KEY='your-api-key'
+```
+
+```python
+from plotly_agent.workflow_orchestrator import WorkflowOrchestrator
+
+orch = WorkflowOrchestrator()
+orch.load_data("data.csv")
+
+response = orch.chat("Show revenue trends, highlighting Cloud Service")
+print(response["code"])
+```
+
 ---
 
 ## License
